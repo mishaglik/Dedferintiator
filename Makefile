@@ -2,13 +2,12 @@ LIB_DIR = lib/
 BIN_DIR = bin/
 SRC_DIR = src/
 
-MAJOR_VERSION = 1
+MAJOR_VERSION = 0
 MINOR_VERSION = 0
 # BUILD_VERSION = `cat bld_version`
 # TODO: Auto increment version
 
-SDL_LIB   = SDL2 SDL2main SDL2_image
-LIBRARIES = Logger Stack File $(SDL_LIB)
+LIBRARIES = Logger Stack File 
 
 CXXFLAGS = `cat $(LIB_DIR)Cflags`
 SANFLAGS = `cat $(LIB_DIR)SanitizeFlags`
@@ -18,19 +17,15 @@ CXXFLAGS += -DMAJOR_VERSION=$(MAJOR_VERSION)
 CXXFLAGS += -DMINOR_VERSION=$(MINOR_VERSION)
 # CXXFLAGS += -DBUILD_VERSION=$(BUILD_VERSION)
 
-# CXXFLAGS += $(SANFLAGS)
+CXXFLAGS += $(SANFLAGS)
 
 SOURCES_Tree = Tree.cpp
 
-SOURCES_StringBuffer = StringBuffer.cpp
-
-SOURCES_AkkWindow = Window.cpp Application.cpp
-
 SUBDIRS = ${shell find $(SRC_DIR) -type d -printf '%P '}
 
-SOURCES = Akkinator.cpp Akkinator_Verbose.cpp $(foreach dir, $(SUBDIRS), $(addprefix $(dir)/, $(SOURCES_$(dir))))
+SOURCES = $(foreach dir, $(SUBDIRS), $(addprefix $(dir)/, $(SOURCES_$(dir))))
 
-EXECUTABLE  = mainG.cpp #main.cpp 
+EXECUTABLE  = main.cpp 
 
 SRC = $(SOURCES) $(EXECUTABLE)
 
@@ -40,11 +35,13 @@ DEP = $(SRC:.cpp=.d)
 
 TARGETS = main
 
+.PHONY: all
+all: init deps $(TARGETS)
+	# ./increaseVersion.sh bld_version
+	
+.PHONY: init
 init:
 	mkdir -p $(addprefix $(BIN_DIR), $(SUBDIRS))
-
-all: $(TARGETS)
-	# ./increaseVersion.sh bld_version
 
 main: $(addprefix $(BIN_DIR), $(OBJ))
 	g++ $(CXXFLAGS) $^ $(LXXFLAGS) -o $@
