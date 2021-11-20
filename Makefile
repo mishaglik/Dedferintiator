@@ -9,7 +9,7 @@ MINOR_VERSION = 0
 
 LIBRARIES = Logger Stack File 
 
-CXXFLAGS = `cat $(LIB_DIR)Cflags`
+CXXFLAGS = `cat $(LIB_DIR)Cflags` -I$(LIB_DIR)
 SANFLAGS = `cat $(LIB_DIR)SanitizeFlags`
 LXXFLAGS = -L$(LIB_DIR) $(addprefix -l, $(LIBRARIES))
 
@@ -19,7 +19,7 @@ CXXFLAGS += -DMINOR_VERSION=$(MINOR_VERSION)
 
 CXXFLAGS += $(SANFLAGS)
 
-SOURCES_Tree = Tree.cpp
+SOURCES_ExpTree = Tree.cpp
 
 SUBDIRS = ${shell find $(SRC_DIR) -type d -printf '%P '}
 
@@ -54,7 +54,7 @@ deps: $(addprefix $(BIN_DIR), $(DEP))
 	echo "Deps builded"
 	
 $(BIN_DIR)%.d : $(SRC_DIR)%.cpp
-	g++ -MM -MT $(@:.d=.o) $< -o $@
+	g++ -MM -MT $(@:.d=.o) $< -o $@ -I$(LIB_DIR)
 
 -include $(addprefix $(BIN_DIR), $(DEP))
 

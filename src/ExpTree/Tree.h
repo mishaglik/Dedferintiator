@@ -1,6 +1,7 @@
 #ifndef DEDFTR_TREE_TREE_H
 #define DEDFTR_TREE_TREE_H
 #include <stdlib.h>
+#include <stdio.h>
 #include "NodeOps.h"
 
 enum class ExprNodeType{
@@ -17,22 +18,25 @@ enum class Operator{
     MUL  = '*',
     DIV  = '/',
 
-    SIN  = 'nis', //sin
-    COS  = 'soc', //cos
-    TAN  = 'gt' , //tg
-    COT  = 'gtc', //ctg
+    SIN  = 0x6E6973, // 'nis' <=> sin
+    COS  = 0x736F63, // 'soc' <=> cos
+    TAN  = 0x006774, // 'gt'  <=> tg
+    COT  = 0x677463, // 'gtc' <=> ctg
 
-    ABS  = 'sba', //abs
+    ABS  = 0x736261, // 'sba' <=> abs
 
 };
 
-Operator getOperator(const char* string);
-
-const char* getOperatorStr(Operator opt);
-
 typedef int      num_t;
 typedef char     var_t;
-typedef Operator opr_t;
+
+union opr_t
+{
+    Operator opr;
+    char     str[sizeof(int)];
+};
+
+opr_t getOperator(const char* string);
 
 union ExprNodeValue
 {
@@ -54,9 +58,22 @@ ExprNode* newNode(ExprNodeType type, ExprNodeValue value, ExprNode* left, ExprNo
 
 void deleteNode(ExprNode* node);
 
-struct ExprTree
-{
-    ExprNode* root = NULL;
+ExprNode* growTree(const char* str, size_t *nRead = NULL);
+
+int parceNodeData(const char* str, ExprNode* node);
+
+struct SearchData{
+    ExprNode* node = NULL;
+    void* extra = NULL;
 };
 
+typedef void (*search_action_f)(SearchData* data);
+
+void treeSearch(ExprNode* node, search_action_f func);
+
+void writeTree(const ExprNode* tree);
+
+char* graphTree(ExprNode* tree);
+
+void skipSpaces(const char** str);
 #endif
