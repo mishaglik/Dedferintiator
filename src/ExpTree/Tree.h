@@ -17,6 +17,7 @@ enum class Operator{
     SUB  = '-',
     MUL  = '*',
     DIV  = '/',
+    POW  = '^',
 
     SIN  = 0x6E6973, // 'nis' <=> sin
     COS  = 0x736F63, // 'soc' <=> cos
@@ -62,18 +63,46 @@ ExprNode* growTree(const char* str, size_t *nRead = NULL);
 
 int parceNodeData(const char* str, ExprNode* node);
 
-struct SearchData{
+enum class TreeSearchType: unsigned{
+    NONE   = 0x0,
+    PREFIX = 0x1,
+    INFIX  = 0x2,
+    SUFFIX = 0x4,
+
+    _PI  = 0x3,
+    _PS  = 0x5,
+    _IS  = 0x6,
+    _PIS = 0x7,
+};
+
+struct TreeSearchData{
     ExprNode* node = NULL;
+    TreeSearchType type = TreeSearchType::NONE;
     void* extra = NULL;
 };
 
-typedef void (*search_action_f)(SearchData* data);
+typedef void (*search_action_f)(TreeSearchData* data);
 
-void treeSearch(ExprNode* node, search_action_f func);
+void treeSearch(ExprNode* node, TreeSearchType type, search_action_f func, void* extra);
 
-void writeTree(const ExprNode* tree);
+void writeTree(ExprNode* tree, FILE* file = stdout);
+
+void writeNodeData(TreeSearchData* data);
 
 char* graphTree(ExprNode* tree);
 
+void writeGraphData(TreeSearchData* data);
+
+void fwriteNodeStr(ExprNode* node, FILE* file);
+
 void skipSpaces(const char** str);
+
+struct IsVarInfo{
+    int isVar = 0;
+    var_t var = 0;
+};
+
+void isNodeVar(TreeSearchData* data);
+
+int isVariable(ExprNode* node, var_t var);
 #endif

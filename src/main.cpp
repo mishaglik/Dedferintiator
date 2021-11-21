@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include "ExpTree/Tree.h"
-
+#include <string.h>
 int main(){
-    // const char* str = "sin";
-    // printf("%#08X\n", *(int*)str);
-    // printf("%#08x\n", Operator::ABS);
-    // printf("%#08X\n", 's');
+    char* string = strdup("(((2) ^ (-1)) + ((5) * (sin(x))))");
+    ExprNode* root = growTree(string);
+
+    writeTree(root);
+
+    free(graphTree(root));
+    free(string);
+    deleteNode(root);
     return 0;
 }

@@ -5,7 +5,10 @@
 #include <ctype.h>
 
 const char* spaceSyms = " \t\n";
-const size_t MAX_TOKEN_LEN = 10;
+
+const size_t MAX_TOKEN_LEN     = 10;
+const size_t GRAPH_FILENAME_SZ = 25;
+const size_t COMMAND_SZ        = 50;
 
 void skipSpaces(const char** str){
     LOG_ASSERT(str != NULL);
@@ -34,6 +37,7 @@ opr_t getOperator(const char* string){
     case Operator::ADD:
     case Operator::SUB:
     case Operator::MUL:
+    case Operator::POW:
     case Operator::DIV:
     case Operator::SIN:
     case Operator::COS:
@@ -149,15 +153,146 @@ ExprNode* growTree(const char* str, size_t *nRead){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void treeSearch(ExprNode* node, search_action_f func);
+void treeSearch(ExprNode* node, TreeSearchType type, search_action_f func, void* extra){
+    LOG_ASSERT(node != NULL);
+    LOG_ASSERT(func != NULL);
+
+    TreeSearchData data = {node, type, extra};
+
+    if((unsigned)type & (unsigned)TreeSearchType::PREFIX){
+        data.type = TreeSearchType::PREFIX;
+        func(&data);
+    }
+
+    if(node->left){
+        treeSearch(node->left, type, func, extra);
+    }
+
+    if((unsigned)type & (unsigned)TreeSearchType::INFIX){
+        data.type = TreeSearchType::INFIX;
+        func(&data);
+    }
+
+    if(node->right){
+        treeSearch(node->right, type, func, extra);
+    }
+
+    if((unsigned)type & (unsigned)TreeSearchType::SUFFIX){
+        data.type = TreeSearchType::SUFFIX;
+        func(&data);
+    }
+}
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void writeTree(const ExprNode* tree);
+void writeTree(ExprNode* tree, FILE* file){
+    LOG_ASSERT(tree != NULL);
+
+    treeSearch(tree, TreeSearchType::_PIS, &writeNodeData, file);
+    fprintf(file, "\n");
+}
 
 //--------------------------------------------------------------------------------------------------------------------
 
-char* graphTree(ExprNode* tree);
+void writeNodeData(TreeSearchData* data){
+    LOG_ASSERT(data != NULL);
+
+    FILE* file = (FILE*)data->extra;
+
+    if(data->type == TreeSearchType::PREFIX){
+        fprintf(file, "(");
+    }
+
+    if(data->type == TreeSearchType::INFIX){
+        fwriteNodeStr(data->node, file);
+    }
+
+    if(data->type == TreeSearchType::SUFFIX){
+        fprintf(file, ")");
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void fwriteNodeStr(ExprNode* node, FILE* file){
+    LOG_ASSERT(node != NULL);
+    LOG_ASSERT(file != NULL);
+
+    switch (node->type)
+    {
+    case ExprNodeType::NUMBER:
+        fprintf(file, "%d", node->value.num);
+        break;
+    case ExprNodeType::VARIABLE:
+        fprintf(file, "%c", node->value.var);
+        break;
+    case ExprNodeType::OPERATOR:
+        fprintf(file, "%s", node->value.opr.str);
+        break;
+    case ExprNodeType::NONE:
+    default:
+        break;
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+char* graphTree(ExprNode* tree){
+    LOG_ASSERT(tree != NULL);
+
+    static int nDump = 0;
+
+    FILE* dotFile = fopen("log/graph.dot", "w");
+    LOG_ASSERT(dotFile != NULL);
+
+    fprintf(dotFile, "digraph G{");
+
+    treeSearch(tree, TreeSearchType::_PS, &writeGraphData, dotFile);
+
+    fprintf(dotFile, "}");
+    fclose(dotFile);
+
+    char* imgFileName = (char*)mgk_calloc(GRAPH_FILENAME_SZ, sizeof(char));
+
+    sprintf(imgFileName, "log/GRAPH_DUMP_%d", nDump++);
+    
+    char command[COMMAND_SZ] = "";
+
+    sprintf(command, "dot log/graph.dot -T png -o %s", imgFileName);
+    LOG_INFO("Executing command: '%s'\n", command);
+    system(command);
+
+    sprintf(command, "eog %s", imgFileName);
+    LOG_INFO("Executing command: '%s'\n", command);
+    system(command);
+    return imgFileName;
+}
+
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void writeGraphData(TreeSearchData* data){
+    LOG_ASSERT(data != NULL);
+
+    FILE* file = (FILE*)data->extra;
+
+    if(data->type == TreeSearchType::PREFIX){
+        fprintf(file, "N%p[label=\"", data->node);
+        fwriteNodeStr(data->node, file);
+    #ifdef DEBUG_GRAPH
+        fprintf(file, "[%p]", data->node);
+    #endif
+        fprintf(file, "\"];\n");
+    }
+
+    if(data->type == TreeSearchType::SUFFIX){
+        if(data->node->left)
+            fprintf(file, "N%p->N%p[label=\"left \"];\n", data->node, data->node->left);
+
+        if(data->node->right)
+            fprintf(file, "N%p->N%p[label=\"right\"];\n", data->node, data->node->right);
+    }
+}
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -165,29 +300,52 @@ int parceNodeData(const char* str, ExprNode* node){
     LOG_ASSERT(str  != NULL);
     LOG_ASSERT(node != NULL);
 
+    LOG_INFO("Getting node data from: \"%s\"\n", str);
+
     int nRead = 0;
 
-    if(sscanf(str, "%d%n", &node->value.num, &nRead) == 2){
+    if(sscanf(str, "%d%n", &node->value.num, &nRead)){
+        LOG_INFO("\t Found number: %d\n", node->value.num);
         node->type = ExprNodeType::NUMBER;
         return nRead;
     }
 
     char token[MAX_TOKEN_LEN] = "";
 
-    sscanf(str, "%s%n", token, &nRead);
+    sscanf(str, "%[^() \n\t]%n", token, &nRead);
+    LOG_INFO("\t Excluded token \"%s\"\n", token);
 
     node->value.opr = getOperator(token);
     if(node->value.opr.opr != Operator::NONE){
+        LOG_INFO("\t Found operator: \"%s\"\n", node->value.opr.str);
         node->type = ExprNodeType::OPERATOR;
         return nRead;
     }
 
-    if(token[1] == '\0' && token[0] != '\0'){
+    if(isalpha(token[0]) && token[0] != '\0'){
         node->type = ExprNodeType::VARIABLE;
         node->value.var = token[0];
-        return nRead;
+        LOG_INFO("\t Found variable: \"%c\"\n", node->value.var);
+        return 1;
     }
 
     LOG_ERROR("Incorrect node data: \"%10s\".\n", str);
     return 0;
+}
+
+int isVariable(ExprNode* node, var_t var){
+    LOG_ASSERT(node != NULL);
+
+    IsVarInfo info = {0, var};
+    treeSearch(node, TreeSearchType::INFIX, &isNodeVar, &info);
+
+    return info.isVar;
+}
+
+void isNodeVar(TreeSearchData* data){
+    LOG_ASSERT(data != NULL);
+
+    IsVarInfo* info = (IsVarInfo*)data->extra;
+
+    info->isVar |= (data->node->type == ExprNodeType::VARIABLE) && (data->node->value.var == info->var);
 }
