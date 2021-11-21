@@ -19,11 +19,11 @@ CXXFLAGS += -DMINOR_VERSION=$(MINOR_VERSION)
 
 CXXFLAGS += $(SANFLAGS)
 
-SOURCES_ExpTree = Tree.cpp
+SOURCES_ExpTree = Tree.cpp TreeOptimizer.cpp
 
 SUBDIRS = ${shell find $(SRC_DIR) -type d -printf '%P '}
 
-SOURCES = $(foreach dir, $(SUBDIRS), $(addprefix $(dir)/, $(SOURCES_$(dir))))
+SOURCES = Differntiator.cpp $(foreach dir, $(SUBDIRS), $(addprefix $(dir)/, $(SOURCES_$(dir))))
 
 EXECUTABLE  = main.cpp 
 

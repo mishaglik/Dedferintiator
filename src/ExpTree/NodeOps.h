@@ -6,15 +6,21 @@
 ZZZzz /,`.-'`'    -.  ;-;;,_            |\__/,|   (`\       (,-.`._,'(       |\`-/|
      |,4-  ) )-,_. ,\ (  `'-'         _.|o o  |_   ) )          `-.-' \ )-`( , o o)
     '---''(_/--'  `-'\_)             -(((---(((--------               `-    \`_`"'-  */
-#define ADD(left, right) newNode(ExprNodeType::OPERATOR, Operator::ADD, left, right)
-#define SUB(left, right) newNode(ExprNodeType::OPERATOR, Operator::SUB, left, right)
-#define MUL(left, right) newNode(ExprNodeType::OPERATOR, Operator::MUL, left, right)
-#define DIV(left, right) newNode(ExprNodeType::OPERATOR, Operator::DIV, left, right)
+#define ADD(left, right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::ADD}, left, right)
+#define SUB(left, right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::SUB}, left, right)
+#define MUL(left, right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::MUL}, left, right)
+#define DIV(left, right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::DIV}, left, right)
+#define POW(left, right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::POW}, left, right)
 
-#define SIN(left, right) newNode(ExprNodeType::OPERATOR, Operator::SIN, left, right)
-#define COS(left, right) newNode(ExprNodeType::OPERATOR, Operator::COS, left, right)
-#define TAN(left, right) newNode(ExprNodeType::OPERATOR, Operator::TAN, left, right)
-#define COT(left, right) newNode(ExprNodeType::OPERATOR, Operator::COT, left, right)
+#define SIN(right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::SIN}, NULL, right)
+#define COS(right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::COS}, NULL, right)
+#define TAN(right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::TAN}, NULL, right)
+#define COT(right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::COT}, NULL, right)
 
-#define ABS(left, right) newNode(ExprNodeType::OPERATOR, Operator::ABS, left, right)
+#define LN(right)  newNode(ExprNodeType::OPERATOR, {.opr = Operator::LN }, NULL, right)
+
+#define ABS(right) newNode(ExprNodeType::OPERATOR, {.opr = Operator::ABS}, NULL, right)
+
+#define CONST(x)  newNode(ExprNodeType::NUMBER  , {.num = x}, NULL, NULL)
+#define VAR(x)    newNode(ExprNodeType::VARIABLE, {.var = x}, NULL, NULL)
 #endif

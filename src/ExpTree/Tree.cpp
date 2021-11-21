@@ -44,6 +44,7 @@ opr_t getOperator(const char* string){
     case Operator::TAN:
     case Operator::COT:
     case Operator::ABS:
+    case Operator::LN:
         return curOpr;
     default:
         curOpr.opr = Operator::NONE;
@@ -254,7 +255,7 @@ char* graphTree(ExprNode* tree){
 
     char* imgFileName = (char*)mgk_calloc(GRAPH_FILENAME_SZ, sizeof(char));
 
-    sprintf(imgFileName, "log/GRAPH_DUMP_%d", nDump++);
+    sprintf(imgFileName, "log/GRAPH_DUMP_%d.png", nDump++);
     
     char command[COMMAND_SZ] = "";
 
@@ -262,7 +263,7 @@ char* graphTree(ExprNode* tree){
     LOG_INFO("Executing command: '%s'\n", command);
     system(command);
 
-    sprintf(command, "eog %s", imgFileName);
+    sprintf(command, "eog %s &", imgFileName);
     LOG_INFO("Executing command: '%s'\n", command);
     system(command);
     return imgFileName;
@@ -348,4 +349,11 @@ void isNodeVar(TreeSearchData* data){
     IsVarInfo* info = (IsVarInfo*)data->extra;
 
     info->isVar |= (data->node->type == ExprNodeType::VARIABLE) && (data->node->value.var == info->var);
+}
+
+ExprNode* copyTree(ExprNode* node){
+    LOG_ASSERT(node != NULL);
+
+    return newNode(node->type, node->value, (node->left  ? copyTree(node->left)  : NULL),
+                                            (node->right ? copyTree(node->right) : NULL));
 }

@@ -26,6 +26,8 @@ enum class Operator{
 
     ABS  = 0x736261, // 'sba' <=> abs
 
+    LN   = 0x006E6C, // 'nl'  <=> ln
+
 };
 
 typedef int      num_t;
@@ -105,4 +107,6 @@ struct IsVarInfo{
 void isNodeVar(TreeSearchData* data);
 
 int isVariable(ExprNode* node, var_t var);
+
+ExprNode* copyTree(ExprNode* tree);
 #endif
