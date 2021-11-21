@@ -4,6 +4,8 @@
 #include "utils.h"
 #include <ctype.h>
 
+// #define AUTO_OPEN_PHOTO
+
 const char* spaceSyms = " \t\n";
 
 const size_t MAX_TOKEN_LEN     = 10;
@@ -31,26 +33,19 @@ opr_t getOperator(const char* string){
 
     strncpy(curOpr.str, string, sizeof(opr_t));
 
+    #define OP_DEF(name, ...) case Operator::name:
+    
     switch (curOpr.opr)
     {
     case Operator::NONE:
-    case Operator::ADD:
-    case Operator::SUB:
-    case Operator::MUL:
-    case Operator::POW:
-    case Operator::DIV:
-    case Operator::SIN:
-    case Operator::COS:
-    case Operator::TAN:
-    case Operator::COT:
-    case Operator::ABS:
-    case Operator::LN:
+    #include OPERATORS_H
         return curOpr;
     default:
         curOpr.opr = Operator::NONE;
         return curOpr;
         break;
     }
+    #undef OP_DEF
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -262,10 +257,11 @@ char* graphTree(ExprNode* tree){
     sprintf(command, "dot log/graph.dot -T png -o %s", imgFileName);
     LOG_INFO("Executing command: '%s'\n", command);
     system(command);
-
+    #ifdef AUTO_OPEN_PHOTO
     sprintf(command, "eog %s &", imgFileName);
     LOG_INFO("Executing command: '%s'\n", command);
     system(command);
+    #endif
     return imgFileName;
 }
 
@@ -334,6 +330,8 @@ int parceNodeData(const char* str, ExprNode* node){
     return 0;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 int isVariable(ExprNode* node, var_t var){
     LOG_ASSERT(node != NULL);
 
@@ -343,6 +341,8 @@ int isVariable(ExprNode* node, var_t var){
     return info.isVar;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 void isNodeVar(TreeSearchData* data){
     LOG_ASSERT(data != NULL);
 
@@ -351,9 +351,42 @@ void isNodeVar(TreeSearchData* data){
     info->isVar |= (data->node->type == ExprNodeType::VARIABLE) && (data->node->value.var == info->var);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
 ExprNode* copyTree(ExprNode* node){
     LOG_ASSERT(node != NULL);
 
     return newNode(node->type, node->value, (node->left  ? copyTree(node->left)  : NULL),
                                             (node->right ? copyTree(node->right) : NULL));
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+#define OP_DEF(name, flags, ...)                                                \
+ExprNode* name(ExprNode* x, ExprNode* y){                                       \
+    if(HAS_FLAG(flags, OperatorFlags::OF_BothArgs)){                            \
+        return newNode(ExprNodeType::OPERATOR, {.opr = Operator::name}, x, y);  \
+    }                                                                           \
+    return newNode(ExprNodeType::OPERATOR, {.opr = Operator::name}, NULL, x);   \
+}
+
+#include OPERATORS_H
+#undef OP_DEF 
+
+//--------------------------------------------------------------------------------------------------------------------
+
+int getOperatorFlags(Operator opr){
+    #define OP_DEF(name, flags, ...) case Operator::name: return flags;
+    switch (opr)
+    {
+    #include OPERATORS_H
+    case Operator::NONE:
+        return 0;
+    default:
+        LOG_ERROR("Unkwnow operator");
+        return 0;
+        break;
+    }
+    #undef OP_DEF
 }

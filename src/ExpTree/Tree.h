@@ -2,7 +2,10 @@
 #define DEDFTR_TREE_TREE_H
 #include <stdlib.h>
 #include <stdio.h>
-#include "NodeOps.h"
+
+#ifndef OPERATORS_H
+#define OPERATORS_H "Operators.h"
+#endif
 
 enum class ExprNodeType{
     NONE     = 0,
@@ -11,24 +14,25 @@ enum class ExprNodeType{
     OPERATOR = 3,
 };
 
+#define OP_DEF(name, flags, strVal, ...) name = strVal,
+
 enum class Operator{
     NONE = 0,
-    ADD  = '+',
-    SUB  = '-',
-    MUL  = '*',
-    DIV  = '/',
-    POW  = '^',
+    #include OPERATORS_H
+};
 
-    SIN  = 0x6E6973, // 'nis' <=> sin
-    COS  = 0x736F63, // 'soc' <=> cos
-    TAN  = 0x006774, // 'gt'  <=> tg
-    COT  = 0x677463, // 'gtc' <=> ctg
-
-    ABS  = 0x736261, // 'sba' <=> abs
-
-    LN   = 0x006E6C, // 'nl'  <=> ln
+#undef OP_DEF
+// 0x00000
+enum class OperatorFlags{
+    OF_BothArgs = 0b100,
+    OF_LZero    = 0b010,
+    OF_RZero    = 0b001,
 
 };
+
+#define HAS_FLAG(flagset, flag) ((flagset) & int(flag))
+
+int getOperatorFlags(Operator opr);
 
 typedef int      num_t;
 typedef char     var_t;
@@ -109,4 +113,11 @@ void isNodeVar(TreeSearchData* data);
 int isVariable(ExprNode* node, var_t var);
 
 ExprNode* copyTree(ExprNode* tree);
+
+#define CONST(x)  newNode(ExprNodeType::NUMBER  , {.num = x}, NULL, NULL)
+#define VAR(x)    newNode(ExprNodeType::VARIABLE, {.var = x}, NULL, NULL)
+
+#define OP_DEF(name, ...) ExprNode* name(ExprNode* x, ExprNode* y = NULL);
+#include OPERATORS_H
+#undef OP_DEF 
 #endif
