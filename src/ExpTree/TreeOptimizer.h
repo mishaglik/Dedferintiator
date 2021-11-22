@@ -19,4 +19,6 @@ void treeOptimize(ExprNode* root);
 int zeroOneArgOpt(ExprNode* node);
 
 int constExprOpt(ExprNode* node);
+
+int doubleDivOpt(ExprNode* node);
 #endif

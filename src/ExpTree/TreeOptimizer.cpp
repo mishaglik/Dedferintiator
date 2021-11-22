@@ -73,6 +73,7 @@ void treeOptimize(ExprNode* root){
         nOptimized = 0;
         OPTIMIZE(zeroOneArgOpt);
         OPTIMIZE(constExprOpt);
+        OPTIMIZE(doubleDivOpt);
     }
     LOG_INFO("Tree optimization finished\n");
     
@@ -232,6 +233,93 @@ int constExprOpt(ExprNode* node){
         nodeCutR(node);
     }
 
+    return nOpt;
+}
+
+int doubleDivOpt(ExprNode* node){
+    LOG_ASSERT(node != NULL);
+
+    int nOpt = 0;
+
+    if(node->left){
+        nOpt += doubleDivOpt(node->left);
+    }
+    if(node->right){
+        nOpt += doubleDivOpt(node->right);
+    }
+
+    if(isOperator(node, Operator::DIV)){
+        LOG_ASSERT(node->left);
+        LOG_ASSERT(node->right);
+
+        if(isOperator(node->left, Operator::DIV)){
+            ExprNode* left = node->left;
+
+            node->left = left->left;
+            left->left = NULL;
+
+            node->right = MUL(node->right, left->right);
+            left->right = NULL;
+
+            deleteNode(left);
+            return nOpt + 1;
+        }
+
+        if(isOperator(node->right, Operator::DIV)){
+            ExprNode* right = node->right;
+
+            node->right = right->left;
+            right->left = NULL;
+
+            node->right = MUL(node->right, right->right);
+            right->right = NULL;
+
+            deleteNode(right);
+            return nOpt + 1;
+        }
+    }
+
+    if(isOperator(node, Operator::MUL)){
+        LOG_ASSERT(node->left);
+        LOG_ASSERT(node->right);
+
+        if(isOperator(node->left, Operator::DIV)){
+            ExprNode* right = node->right;
+            node->right = NULL;
+
+            nodeCutR(node);
+            node->left = MUL(node->left, right);
+            return nOpt + 1;
+        }
+
+        if(isOperator(node->right, Operator::DIV)){
+            ExprNode* left = node->left;
+            node->left = NULL;
+            
+            nodeCutL(node);
+            
+            node->left = MUL(left,node->left);
+            return nOpt + 1;
+        }
+    }
+
+    if(isOperator(node, Operator::POW)){
+        LOG_ASSERT(node->left);
+        LOG_ASSERT(node->right);
+
+        if(isOperator(node->left, Operator::POW)){
+            ExprNode* left = node->left;
+
+            node->left = left->left;
+            left->left = NULL;
+
+            node->right = MUL(left->right, node->right);
+            left->right = NULL;
+
+            deleteNode(left);
+            return nOpt + 1;
+        }
+    }
     return nOpt;
 }
 #pragma GCC diagnostic pop

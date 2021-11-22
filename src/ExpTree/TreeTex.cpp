@@ -196,7 +196,7 @@ void TEX_Phrase(TEX_PLACE place, ...){
         TEX("Здесь делать нечего:\n");
         break;
     case TEX_PLACE::SummUp:
-        TEX("В итоге получим\n");
+        TEX("В итоге, после пары преобрзаованией, получим:\n");
         break;
     case TEX_PLACE::DiffOpt:
         TEX(CHOOSE(TEX_DIFF));
