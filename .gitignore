@@ -59,3 +59,6 @@ log/
 main
 *.pdf
 *.tex
+*.aux
+*.log
+Diff*

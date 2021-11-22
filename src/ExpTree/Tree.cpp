@@ -390,3 +390,29 @@ int getOperatorFlags(Operator opr){
     }
     #undef OP_DEF
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void findVars(ExprNode* node, var_t* varList, size_t* nVars){
+    LOG_ASSERT(node    != NULL);
+    LOG_ASSERT(varList != NULL);
+    LOG_ASSERT(nVars   != NULL);
+
+
+    if(node->left)
+        findVars(node->left, varList, nVars);
+    if(node->right)
+        findVars(node->right, varList, nVars);
+    
+    if(node->type == ExprNodeType::VARIABLE){
+        for(size_t i = 0; i < *nVars; ++i){
+            if(varList[i] == node->value.var)
+                return;
+        }
+        if(*nVars == MAX_VARS){
+            LOG_WARNING("Too many variables\n");
+            return;
+        }
+        varList[(*nVars)++] = node->value.var;
+    }
+}

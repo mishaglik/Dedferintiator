@@ -3,8 +3,7 @@
 #include <stdarg.h>
 
 #include "TexPhrases.h"
-#define TEX(format, ...) TEX_Printf(format, ## __VA_ARGS__)
-#define nTab(n) for(int _ = 0; _ < n; ++_) TEX("\t");
+
 
 FILE* TEX_File = NULL;
 
@@ -12,6 +11,7 @@ void TEX_Start(){
     TEX_File = fopen("Diff.tex", "w");
     LOG_ASSERT(TEX_File != NULL);
     TEX(TEX_INIT);
+    TEX(TEX_CHAPTER_1);
 }
 
 void TEX_Finish(){
@@ -32,6 +32,12 @@ void TEX_Printf(const char* format, ...){
 
 void TEX_Formula(ExprNode* node){
     LOG_ASSERT(node != NULL);
+
+    size_t nVars = 0;
+    var_t vars[MAX_VARS] = {};
+    findVars(node, vars, &nVars);
+
+    
     TEX("$$\n");
     TEX_Node(node, 0);
     TEX("$$\n");
@@ -166,3 +172,24 @@ const char* getOpTexStr(const Operator opr){
     }
 }
 #undef OP_DEF
+
+void TEX_Phrase(TEX_PLACE place, ...){
+    va_list ap;
+    va_start(ap, place);
+    switch (place)
+    {
+    case TEX_PLACE::SingleDiffStart:
+        TEX(CHOOSE(TEX_DIF_VAR), (var_t)va_arg(ap, int));
+        break;
+    case TEX_PLACE::DiffStart:
+        TEX(CHOOSE(TEX_DIFF_START));
+        break;
+    case TEX_PLACE::FindVars:
+    case TEX_PLACE::NoDiff:
+    case TEX_PLACE::SummUp:
+    default:
+        break;
+    }
+
+    va_end(ap);
+}

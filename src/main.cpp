@@ -9,7 +9,7 @@ int main(){
     char* string = strdup("((((2) ^ (x)) + ((5) * (ln((7) / (x))))) + (y))");
     ExprNode* root = growTree(string);
 
-    TEX_Formula(root);
+    // TEX_Formula(root);
     free(graphTree(root));
     ExprNode* diff = fullDifferntial(root);
     free(graphTree(diff));

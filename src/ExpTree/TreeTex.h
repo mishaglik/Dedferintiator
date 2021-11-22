@@ -3,6 +3,9 @@
 #include "Tree.h"
 #include "TreeOptimizer.h"
 
+#define TEX(format, ...) TEX_Printf(format, ## __VA_ARGS__)
+#define nTab(n) for(int _ = 0; _ < n; ++_) TEX("\t");
+
 void TEX_Start();
 
 void TEX_Finish();
@@ -15,5 +18,14 @@ void TEX_Node(ExprNode* node, int depth);
 
 const char* getOpTexStr(const Operator opr);
 
+enum class TEX_PLACE{
+    DiffStart,
+    SingleDiffStart,
+    FindVars,
+    NoDiff,
+    SummUp,
+};
+
+void TEX_Phrase(TEX_PLACE place, ...);
 
 #endif

@@ -6,6 +6,7 @@
 #ifndef OPERATORS_H
 #define OPERATORS_H "Operators.h"
 #endif
+const size_t MAX_VARS = 255;
 
 enum class ExprNodeType{
     NONE     = 0,
@@ -102,6 +103,8 @@ void writeGraphData(TreeSearchData* data);
 void fwriteNodeStr(ExprNode* node, FILE* file);
 
 void skipSpaces(const char** str);
+
+void findVars(ExprNode* node, var_t* varList, size_t* nVars);
 
 struct IsVarInfo{
     int isVar = 0;

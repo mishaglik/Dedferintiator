@@ -1,7 +1,6 @@
 #include "Differntiator.h"
 #include "Logger.h"
 
-const size_t MAX_VARS = 255;
 
 #define C(x) copyTree(x)
 #define D(x) diffentiate(x, var)
@@ -49,44 +48,34 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
 ExprNode* fullDifferntial(ExprNode* node){
     LOG_ASSERT(node != NULL);
 
+    TEX_Formula(node);
+    TEX_Phrase(TEX_PLACE::DiffStart);
+
     var_t varList[MAX_VARS] = {};
     size_t nVars = 0;
 
     findVars(node, varList, &nVars);
+
+    TEX_Phrase(TEX_PLACE::FindVars, varList, nVars);
+    
     if(nVars == 0){
+        TEX_Phrase(TEX_PLACE::NoDiff);
         return CONST(0);
     }
     if(nVars == 1){
+        TEX_Phrase(TEX_PLACE::SingleDiffStart, varList[0]);
         return diffentiate(node, varList[0]);
     }
-    ExprNode* curNode = ADD(POW(diffentiate(node, varList[0]) , CONST(2)), diffentiate(node, varList[1]));
+
+    TEX_Phrase(TEX_PLACE::SingleDiffStart, varList[0]);
+    ExprNode* firstDiff = diffentiate(node, varList[0]);
+    ExprNode* curNode = ADD(POW(firstDiff , CONST(2)), POW(diffentiate(node, varList[1]), CONST(2)));
 
     for(size_t i = 2; i < nVars; ++i){
+        TEX_Phrase(TEX_PLACE::SingleDiffStart, varList[i]);
         curNode = ADD(curNode, POW(diffentiate(node, varList[i]), CONST(2)));
     }
-
+    TEX_Phrase(TEX_PLACE::SummUp);
     return POW(curNode, DIV(CONST(1), CONST(2)));
 }
 
-void findVars(ExprNode* node, var_t* varList, size_t* nVars){
-    LOG_ASSERT(node    != NULL);
-    LOG_ASSERT(varList != NULL);
-    LOG_ASSERT(nVars   != NULL);
-
-    if(node->left)
-        findVars(node->left, varList, nVars);
-    if(node->right)
-        findVars(node->right, varList, nVars);
-    
-    if(node->type == ExprNodeType::VARIABLE){
-        for(size_t i = 0; i < *nVars; ++i){
-            if(varList[i] == node->value.var)
-                return;
-        }
-        if(*nVars == MAX_VARS){
-            LOG_WARNING("Too many variables\n");
-            return;
-        }
-        varList[(*nVars)++] = node->value.var;
-    }
-}
