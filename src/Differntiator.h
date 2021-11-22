@@ -7,4 +7,7 @@
 
 ExprNode* diffentiate(ExprNode* node, var_t var);
 
+ExprNode* fullDifferntial(ExprNode* node);
+
+void findVars(ExprNode* node, var_t* varList, size_t* nVars);
 #endif

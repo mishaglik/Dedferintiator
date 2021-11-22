@@ -1,6 +1,8 @@
 #include "Differntiator.h"
 #include "Logger.h"
 
+const size_t MAX_VARS = 255;
+
 #define C(x) copyTree(x)
 #define D(x) diffentiate(x, var)
 
@@ -20,30 +22,10 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
                 return CONST(0);
             }
 
-            #define OP_DEF(name, flags, strVal, diff) case Operator::name: return diff;
+            #define OP_DEF(name, flags, strVal, diff, ...) case Operator::name: return diff;
             switch (node->value.opr.opr)
             {
             #include OPERATORS_H
-            /*case Operator::ADD: return ADD(D(L), D(R));
-            case Operator::SUB: return SUB(D(L), D(R));
-            case Operator::MUL: return ADD(MUL(D(L), C(R)), MUL(C(L), D(R)));
-            case Operator::DIV: return DIV(SUB(MUL(D(L), C(R)), MUL(C(L), D(R))), POW(C(R), CONST(2)));
-
-            case Operator::SIN: return MUL(COS(C(R)), D(R));
-            case Operator::COS: return MUL(MUL(CONST(-1), SIN(C(R))), D(R));
-            case Operator::TAN: return DIV(               D(R) , POW(COS(C(R)), CONST(2)));
-            case Operator::COT: return DIV(MUL(CONST(-1), D(R)), POW(SIN(C(R)), CONST(2)));
-
-            case Operator::ABS: return MUL(DIV(ABS(C(R)), C(R)), D(R));
-            case Operator::LN : return DIV(D(R), C(R));
-
-            case Operator::POW:
-            {
-                if(!isVariable(R, var)){
-                    return MUL(MUL(C(R), POW(C(L), SUB(C(R), CONST(1)))), D(L));
-                }
-                return MUL(C(node), ADD(MUL(D(R), LN(C(L))), MUL(DIV(D(L), C(L)), C(R))));
-            }*/
             case Operator::NONE:
             default:
                 LOG_ERROR("Inappropriate operator");
@@ -62,3 +44,49 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
 #undef D
 #undef L
 #undef R
+
+
+ExprNode* fullDifferntial(ExprNode* node){
+    LOG_ASSERT(node != NULL);
+
+    var_t varList[MAX_VARS] = {};
+    size_t nVars = 0;
+
+    findVars(node, varList, &nVars);
+    if(nVars == 0){
+        return CONST(0);
+    }
+    if(nVars == 1){
+        return diffentiate(node, varList[0]);
+    }
+    ExprNode* curNode = ADD(POW(diffentiate(node, varList[0]) , CONST(2)), diffentiate(node, varList[1]));
+
+    for(size_t i = 2; i < nVars; ++i){
+        curNode = ADD(curNode, POW(diffentiate(node, varList[i]), CONST(2)));
+    }
+
+    return POW(curNode, DIV(CONST(1), CONST(2)));
+}
+
+void findVars(ExprNode* node, var_t* varList, size_t* nVars){
+    LOG_ASSERT(node    != NULL);
+    LOG_ASSERT(varList != NULL);
+    LOG_ASSERT(nVars   != NULL);
+
+    if(node->left)
+        findVars(node->left, varList, nVars);
+    if(node->right)
+        findVars(node->right, varList, nVars);
+    
+    if(node->type == ExprNodeType::VARIABLE){
+        for(size_t i = 0; i < *nVars; ++i){
+            if(varList[i] == node->value.var)
+                return;
+        }
+        if(*nVars == MAX_VARS){
+            LOG_WARNING("Too many variables\n");
+            return;
+        }
+        varList[(*nVars)++] = node->value.var;
+    }
+}

@@ -57,3 +57,5 @@ lib/
 lib
 log/
 main
+*.pdf
+*.tex
