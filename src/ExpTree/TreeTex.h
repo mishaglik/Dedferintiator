@@ -24,8 +24,11 @@ enum class TEX_PLACE{
     FindVars,
     NoDiff,
     SummUp,
+    DiffOpt,
 };
 
 void TEX_Phrase(TEX_PLACE place, ...);
+
+void TEX_D(ExprNode* node, var_t var);
 
 #endif

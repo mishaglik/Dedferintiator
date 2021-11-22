@@ -20,6 +20,7 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
             if(!isVariable(node, var)){
                 return CONST(0);
             }
+            TEX_D(node, var);
 
             #define OP_DEF(name, flags, strVal, diff, ...) case Operator::name: return diff;
             switch (node->value.opr.opr)

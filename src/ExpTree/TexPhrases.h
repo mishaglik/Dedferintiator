@@ -48,13 +48,15 @@ const char* TEX_DIF_VAR[TEX_DIF_VAR_SZ] = {
     "Теперь нужно лишь взять производную по $ %c $\n",
 };
 
-const int   TEX_DIFF_SZ = 5;
+const int   TEX_DIFF_SZ = 7;
 const char* TEX_DIFF[TEX_DIFF_SZ] = {
     "Теперь исследуем данную функцию:\n",
     "Очевидно что \n",
     "Как уже показано ранее:\n",
     "Можно заметить, что \n",
     "",
+    "",
+    "По известному соотношению\n"
 };
 
 const int   TEX_DIFF_START_SZ = 1;

@@ -44,4 +44,6 @@ OP_DEF(ABS, 0b001, 0x736261 /* 'sba' */, MUL(DIV(ABS(C(R)), C(R)), D(R)), "")
 
 OP_DEF(LN , 0b000, 0x006E6C /* 'nl'  */, DIV(D(R), C(R)), "\\ln")
 
+OP_DEF(DF , 0b000, 'd', D(R), "'")
+
 #endif

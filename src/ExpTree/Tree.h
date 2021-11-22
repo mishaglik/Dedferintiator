@@ -62,6 +62,23 @@ struct ExprNode
     ExprNode* right = NULL;
 };
 
+struct ExprNodeLabel{
+    ExprNode* node = NULL;
+    char*     name = NULL;
+};
+
+const size_t MAX_NODE_LABELS = 255;
+
+void registerLabel(ExprNode* node, char* str);
+
+ExprNode* getNodeByStr(char* str);
+
+char* getNodeName(ExprNode* node);
+
+void reRegster(ExprNode* node, char* str);
+
+void unRegister(ExprNode* node);
+
 ExprNode* newNode(ExprNodeType type, ExprNodeValue value, ExprNode* left, ExprNode* right);
 
 void deleteNode(ExprNode* node);

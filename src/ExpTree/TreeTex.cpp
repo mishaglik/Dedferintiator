@@ -144,11 +144,19 @@ void TEX_Node(ExprNode* node, int depth){
                 nTab(depth);
                 TEX("}\\right)\n");
                 break;
+            case Operator::DF:
+                LOG_ASSERT(node->right);
+                TEX("\\left({");
+                TEX_Node(node->right,depth + 1);
+                nTab(depth);
+                TEX("}\\right)'\n");
+                break;
             case Operator::NONE:
             default:
                 LOG_ERROR("Unknow tex or incorrect operator\n");
                 break;
             }
+
         }
         break;
     case ExprNodeType::NONE:
@@ -184,12 +192,59 @@ void TEX_Phrase(TEX_PLACE place, ...){
     case TEX_PLACE::DiffStart:
         TEX(CHOOSE(TEX_DIFF_START));
         break;
-    case TEX_PLACE::FindVars:
     case TEX_PLACE::NoDiff:
+        TEX("Здесь делать нечего:\n");
+        break;
     case TEX_PLACE::SummUp:
+        TEX("В итоге получим\n");
+        break;
+    case TEX_PLACE::DiffOpt:
+        TEX(CHOOSE(TEX_DIFF));
+        break;
+    case TEX_PLACE::FindVars:
     default:
         break;
     }
 
     va_end(ap);
+}
+
+
+
+
+#define L nNode->left
+#define R nNode->right
+#define C(x) copyTree(x)
+#define D(x) DF(C(x))
+
+void TEX_D(ExprNode* node, var_t var){
+    LOG_ASSERT(node != NULL);
+
+    if(node->type != ExprNodeType::OPERATOR) return;
+
+    TEX_Phrase(TEX_PLACE::DiffOpt, node->value.opr.opr);
+
+
+    ExprNode* nNode = copyTree(node);
+    ExprNode* oRoot = DF(nNode); 
+    ExprNode* nRoot = NULL;
+
+    #define OP_DEF(name, flags, strVal, diff, ...) case Operator::name: {nRoot = diff;} break;
+    switch (nNode->value.opr.opr)
+    {
+    #include OPERATORS_H
+    case Operator::NONE:
+    default:
+        LOG_ERROR("Wrong operator\n");
+        break;
+    }
+
+    TEX("$$\n");    
+    TEX_Node(oRoot, 0);
+    TEX(" = ");
+    TEX_Node(nRoot, 0);
+    TEX("$$\n");
+
+    deleteNode(oRoot);
+    deleteNode(nRoot);
 }

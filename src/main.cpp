@@ -6,7 +6,7 @@
 #include <string.h>
 int main(){
     TEX_Start();
-    char* string = strdup("((((2) ^ (x)) + ((5) * (ln((7) / (x))))) + (y))");
+    char* string = strdup("((((2) ^ ((x) * (cos(x)))) + ((5) * (ln((7) / ((x)^(y)))))) + ((y) ^ (2)))");
     ExprNode* root = growTree(string);
 
     // TEX_Formula(root);

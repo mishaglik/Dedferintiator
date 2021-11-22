@@ -5,12 +5,17 @@
 #include <ctype.h>
 
 // #define AUTO_OPEN_PHOTO
+// #define DEBUG_GRAPH
 
 const char* spaceSyms = " \t\n";
 
 const size_t MAX_TOKEN_LEN     = 10;
 const size_t GRAPH_FILENAME_SZ = 25;
 const size_t COMMAND_SZ        = 50;
+
+size_t nLabels = 0;
+ExprNodeLabel NODE_LABELS[MAX_NODE_LABELS] = {};
+
 
 void skipSpaces(const char** str){
     LOG_ASSERT(str != NULL);
@@ -277,7 +282,7 @@ void writeGraphData(TreeSearchData* data){
         fprintf(file, "N%p[label=\"", data->node);
         fwriteNodeStr(data->node, file);
     #ifdef DEBUG_GRAPH
-        fprintf(file, "[%p]", data->node);
+        fprintf(file, "%p", data->node);
     #endif
         fprintf(file, "\"];\n");
     }
@@ -415,4 +420,69 @@ void findVars(ExprNode* node, var_t* varList, size_t* nVars){
         }
         varList[(*nVars)++] = node->value.var;
     }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void registerLabel(ExprNode* node, char* str){
+    LOG_ASSERT(node != NULL);
+    LOG_ASSERT(str  != NULL);
+
+    if(getNodeName(node) != str && nLabels < MAX_NODE_LABELS){
+        NODE_LABELS[nLabels].node = node;
+        NODE_LABELS[nLabels].name = str;
+        nLabels++;
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+ExprNode* getNodeByStr(char* str){
+    LOG_ASSERT(str != NULL);
+    for(size_t i = 0; i < nLabels; ++i){
+        if(strcmp(NODE_LABELS[i].name, str) == 0){
+            return NODE_LABELS[i].node;
+        }
+    }
+    return NULL;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+char* getNodeName(ExprNode* node){
+    LOG_ASSERT(node != NULL);
+    for(size_t i = 0; i < nLabels; ++i){
+        if(NODE_LABELS[i].node == node){
+            return NODE_LABELS[i].name;
+        }
+    }
+    return NULL;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void reRegster(ExprNode* node, char* str){
+    LOG_ASSERT(node != NULL);
+    LOG_ASSERT(str  != NULL);
+    for(size_t i = 0; i < nLabels; ++i){
+        if(NODE_LABELS[i].node == node){
+            NODE_LABELS[i].name = str;
+            return;
+        }
+    }
+    return;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void unRegister(ExprNode* node){
+    LOG_ASSERT(node != NULL);
+    for(size_t i = 0; i < nLabels; ++i){
+        if(NODE_LABELS[i].node == node){
+            NODE_LABELS[i].node = NULL;
+            NODE_LABELS[i].name = NULL;
+            return;
+        }
+    }
+    return;
 }
