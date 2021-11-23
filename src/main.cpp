@@ -3,19 +3,27 @@
 #include "ExpTree/TreeOptimizer.h"
 #include "ExpTree/TreeTex.h"
 #include "Differntiator.h"
+#include "File.h"
+#include "Logger.h"
+#include "utils.h"
 #include <string.h>
 int main(){
     TEX_Start();
-    char* string = strdup("((((2) ^ ((x) * (cos(x)))) + ((5) * (ln((7) / ((x)^(y)))))) + ((y) ^ (2)))");
+
+    FILE* inFile = fopen("func.txt", "r");
+    LOG_ASSERT(inFile != NULL);
+
+    size_t file_sz = getFileSize(inFile);
+
+    char* string = (char*)mgk_calloc(file_sz + 1, sizeof(char));
+    fread(string, sizeof(char), file_sz, inFile);
+
+    fclose(inFile);
+
     ExprNode* root = growTree(string);
 
-    // TEX_Formula(root);
-    free(graphTree(root));
     ExprNode* diff = fullDifferntial(root);
-    free(graphTree(diff));
-    treeOptimize(diff);
 
-    TEX_Formula(diff);
 
     free(graphTree(diff));
     free(string);

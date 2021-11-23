@@ -159,7 +159,7 @@ int zeroOneArgOpt(ExprNode* node){
                 case Operator::LN:
                 case Operator::DIV:
                 case Operator::COT:
-                    LOG_WARNING("Found dividion/cot/ln with zero. It's abnormal\n");
+                    LOG_WARNING("Found division/cot/ln with zero. It's abnormal\n");
                     return nOpt;
                 default:
                     break;
@@ -252,7 +252,7 @@ int doubleDivOpt(ExprNode* node){
         LOG_ASSERT(node->left);
         LOG_ASSERT(node->right);
 
-        if(isOperator(node->left, Operator::DIV)){
+        if(isOperator(node->left, Operator::DIV)){ //TODO:Docs
             ExprNode* left = node->left;
 
             node->left = left->left;
@@ -295,7 +295,7 @@ int doubleDivOpt(ExprNode* node){
         if(isOperator(node->right, Operator::DIV)){
             ExprNode* left = node->left;
             node->left = NULL;
-            
+
             nodeCutL(node);
             
             node->left = MUL(left,node->left);

@@ -7,6 +7,10 @@
 // #define AUTO_OPEN_PHOTO
 // #define DEBUG_GRAPH
 
+const char* OP_COLOR = "blue";
+const char* CO_COLOR = "green";
+const char* VA_COLOR = "black";
+
 const char* spaceSyms = " \t\n";
 
 const size_t MAX_TOKEN_LEN     = 10;
@@ -279,7 +283,24 @@ void writeGraphData(TreeSearchData* data){
     FILE* file = (FILE*)data->extra;
 
     if(data->type == TreeSearchType::PREFIX){
-        fprintf(file, "N%p[label=\"", data->node);
+        const char* color = NULL;
+        switch (data->node->type)
+        {
+        case ExprNodeType::VARIABLE:
+            color = VA_COLOR;
+            break;
+        case ExprNodeType::OPERATOR:
+            color = OP_COLOR;
+            break;
+        case ExprNodeType::NUMBER:
+            color = CO_COLOR;
+            break;
+        case ExprNodeType::NONE:
+        default:
+            LOG_ERROR("Incorrect node type\n");
+            break;
+        }
+        fprintf(file, "N%p[color = \"%s\",label=\"",data->node, color);
         fwriteNodeStr(data->node, file);
     #ifdef DEBUG_GRAPH
         fprintf(file, "%p", data->node);

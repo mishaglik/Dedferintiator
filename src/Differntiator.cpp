@@ -50,6 +50,8 @@ ExprNode* fullDifferntial(ExprNode* node){
     LOG_ASSERT(node != NULL);
 
     TEX_Formula(node);
+    free(graphTree(node));
+
     TEX_Phrase(TEX_PLACE::DiffStart);
 
     var_t varList[MAX_VARS] = {};
@@ -77,6 +79,12 @@ ExprNode* fullDifferntial(ExprNode* node){
         curNode = ADD(curNode, POW(diffentiate(node, varList[i]), CONST(2)));
     }
     TEX_Phrase(TEX_PLACE::SummUp);
-    return POW(curNode, DIV(CONST(1), CONST(2)));
+    ExprNode* diff =  POW(curNode, DIV(CONST(1), CONST(2)));
+    free(graphTree(diff));
+    treeOptimize(diff);
+    TEX_Formula(diff);
+    free(graphTree(diff));
+
+    return diff;
 }
 

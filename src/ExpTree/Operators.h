@@ -5,13 +5,15 @@
 // name, flags, strVal, Diff, TeX
 
 /**
- * flags 0b0000000N
- *       0b1 - both arguments
+ * flags 0b000
+ *       0b100 - both arguments
+ *       0b010 - isLeftZero   f(0, x) = 0 ?
+ *       0b001 - isRightZero  f(x, 0) = 0 ?
  * 
  */
 
 
-/*      Cats lays on sick place.
+/*      Cats lay on a sick places... :(
       |\      _,,,---,,_                                     _._     _,-'""`-._
 ZZZzz /,`.-'`'    -.  ;-;;,_            |\__/,|   (`\       (,-.`._,'(       |\`-/|
      |,4-  ) )-,_. ,\ (  `'-'         _.|o o  |_   ) )          `-.-' \ )-`( , o o)
