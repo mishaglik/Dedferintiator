@@ -1,6 +1,6 @@
 #ifndef DEDFTR_TREE_TREE_TEX_H
 #define DEDFTR_TREE_TREE_TEX_H
-#include "Tree.h"
+#include "Node.h"
 #include "TreeOptimizer.h"
 
 #define TEX(format, ...) TEX_Printf(format, ## __VA_ARGS__)

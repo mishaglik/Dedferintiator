@@ -1,6 +1,6 @@
 #ifndef DEDFTR_TREE_TREE_OPTIMIZER_H
 #define DEDFTR_TREE_TREE_OPTIMIZER_H
-#include "Tree.h"
+#include "Node.h"
 
 int isNodeZero(ExprNode* node);
 
