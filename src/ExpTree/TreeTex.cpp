@@ -330,8 +330,8 @@ void TEX_Replace(const ExprNode* node){
 //------------------------------------------------------------------------------------------------
 
 const char* TEX_GetVarName(){
-    static int i = 0;
-    return TEX_VARS[i++];
+    static int count = 0;
+    return TEX_VARS[count++];
 }
 
 //------------------------------------------------------------------------------------------------
