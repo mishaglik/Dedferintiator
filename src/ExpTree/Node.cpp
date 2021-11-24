@@ -45,7 +45,7 @@ void deleteNode(ExprNode* node){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void treeSearch(ExprNode* node, TreeSearchType type, search_action_f func, void* extra){
+void treeSearch(const ExprNode* node, TreeSearchType type, search_action_f func, void* extra){
     LOG_ASSERT(node != NULL);
     LOG_ASSERT(func != NULL);
 
@@ -78,7 +78,7 @@ void treeSearch(ExprNode* node, TreeSearchType type, search_action_f func, void*
 //--------------------------------------------------------------------------------------------------------------------
 
 
-int isVariable(ExprNode* node, var_t var){
+int isVariable(const ExprNode* node, var_t var){
     LOG_ASSERT(node != NULL);
 
     IsVarInfo info = {0, var};
@@ -99,7 +99,7 @@ void isNodeVar(TreeSearchData* data){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-ExprNode* copyTree(ExprNode* node){
+ExprNode* copyTree(const ExprNode* node){
     LOG_ASSERT(node != NULL);
 
 
@@ -147,7 +147,7 @@ int getOperatorFlags(Operator opr){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void findVars(ExprNode* node, var_t* varList, size_t* nVars){
+void findVars(const ExprNode* node, var_t* varList, size_t* nVars){
     LOG_ASSERT(node    != NULL);
     LOG_ASSERT(varList != NULL);
     LOG_ASSERT(nVars   != NULL);
@@ -209,4 +209,19 @@ int isTreeEq(const ExprNode* tree1,const ExprNode* tree2){
         return -1;
     }
     return 1;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+void setVar(ExprNode* tree, var_t var, num_t value){
+    LOG_ASSERT(tree != NULL);
+
+    if(tree->left ) setVar(tree->left , var, value);
+    if(tree->right) setVar(tree->right, var, value);
+
+    if(tree->type == ExprNodeType::VARIABLE && tree->value.var == var){
+        tree->type = ExprNodeType::NUMBER;
+        tree->value.num = value;
+    }
 }

@@ -36,7 +36,7 @@ const char* copyRegisterLabel(const ExprNode* node){
     LOG_ASSERT(LABELS != NULL);
     LOG_ASSERT(node   != NULL);
     if(LABELS->size >= LABELS->capacity){
-        LOG_ERROR("LabelNS overflow\n");
+        // LOG_ERROR("LabelNS overflow\n");
         return NULL;
     }
 
@@ -59,9 +59,12 @@ const char* copyRegisterLabel(const ExprNode* node){
 const char* registerLabel(const ExprNode* node){
     LOG_ASSERT(LABELS != NULL);
     LOG_ASSERT(node   != NULL);
+    if(getNameF == NULL) return NULL;
 
     const char* str = copyRegisterLabel(node);
     if(str) return str;
+
+    if(LABELS->size >= LABELS->capacity) return NULL;
 
     // LOG_DEBUG("New Register:\n");
     if(getNameF != NULL){
@@ -90,6 +93,7 @@ void deleteLabel(const ExprNode* node){
 const char* getLabelName(const ExprNode* node){
     LOG_ASSERT(LABELS != NULL);
     LOG_ASSERT(node   != NULL);
+    if(getNameF == NULL) return NULL;
 
     for(size_t i = 0; i < LABELS->size; ++i){
         if(LABELS->labels[i].node == node) return LABELS->labels[i].name;
@@ -101,6 +105,7 @@ const char* getLabelName(const ExprNode* node){
 
 void forEachUnique(forEach_f actFunc){
     LOG_ASSERT(LABELS != NULL);
+    if(getNameF == NULL) return;
 
     for(size_t cur = 0; cur < LABELS->size; ++cur){
         if(LABELS->labels[cur].node == NULL) continue;
@@ -121,7 +126,7 @@ size_t buildTreeLabeling(ExprNode* tree, int depth){
     LOG_ASSERT(tree     != NULL);
     LOG_ASSERT(LABELS   != NULL);
     LOG_ASSERT(getNameF != NULL);
-
+    if(getNameF == NULL) return 0;
     if(getLabelName(tree)) return 1;
 
     if(tree->left )buildTreeLabeling(tree->left , depth + 1);

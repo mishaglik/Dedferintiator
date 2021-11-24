@@ -5,22 +5,22 @@
 
 extern const char* (*getNameF)();
 
-int isNodeZero(ExprNode* node){
+int isNodeZero(const ExprNode* node){
     LOG_ASSERT(node != NULL);
     return node->type == ExprNodeType::NUMBER && node->value.num == 0;
 }
 
-int isNodeOne(ExprNode* node){
+int isNodeOne(const ExprNode* node){
     LOG_ASSERT(node != NULL);
     return node->type == ExprNodeType::NUMBER && node->value.num == 1;
 }
 
-int isOperator(ExprNode* node, Operator opr){
+int isOperator(const ExprNode* node, Operator opr){
     LOG_ASSERT(node != NULL);
     return node->type == ExprNodeType::OPERATOR && node->value.opr.opr == opr;
 }
 
-void nodeCpy(ExprNode* dest, ExprNode* src){
+void nodeCpy(ExprNode* dest, const ExprNode* src){
     LOG_ASSERT(dest != NULL);
     LOG_ASSERT(src  != NULL);
 

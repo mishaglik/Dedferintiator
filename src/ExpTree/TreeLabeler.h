@@ -3,7 +3,7 @@
 #include "Node.h"
 
 const size_t LABELS_INIT_CAPACITY = 100;
-const size_t REQUIRE_SUBTREE_SIZE = 250;
+const size_t REQUIRE_SUBTREE_SIZE = 300;
 
 struct Label
 {

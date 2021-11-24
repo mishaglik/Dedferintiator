@@ -8,19 +8,13 @@
 #include "utils.h"
 #include <string.h>
 
-const char* names[] = {
-    "\\alpha", "\\beta", "p", "a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l'", "\\gamma", "\\mu", "A", "B", "C", "D", "E", "F"
-};
-const char* getName();
-const char* getName(){
-    static int i = 0;
-    return names[i++];
-}
+void CreateTex(const ExprNode* expr);
 
 int main(){
-    TEX_Start();
+    logger_set_log_level(FATAL);
+
     setGlobalLabelNS(createLabelNS());
-    setNamingFunction(&getName);
+    setNamingFunction(&TEX_GetVarName);
 
     FILE* inFile = fopen("func.txt", "r");
     LOG_ASSERT(inFile != NULL);
@@ -34,14 +28,41 @@ int main(){
 
     ExprNode* root = growTree(string);
 
-    ExprNode* diff = fullDifferntial(root);
+    CreateTex(root);
 
-
-    free(graphTree(diff));
     free(string);
     deleteNode(root);
-    deleteNode(diff);
     deleteLabelNS(getGlobalLabelNS());
-    TEX_Finish();
     return 0;
 }
+
+void CreateTex(const ExprNode* node){
+    LOG_ASSERT(node != NULL);
+    TEX_Start();
+
+    TEX_Part(0);
+    
+    TEX_DLib();
+    
+    TEX_Part(1);
+    TEX_Formula(node, "f");
+    TEX_Part(2);
+    ExprNode* diff = fullDifferntial(node);
+
+    TEX("И собирая всё по формуле полного дифференциала получим:\n");
+    TEX_Formula(diff);
+    TEX("Где, \n");
+    forEachUnique(&TEX_Replace);
+
+    TEX_Pause();
+    // ExprNode* test = taylorSeries(node, 'x', 0, 10);
+    TEX_Resume();
+
+    // TEX_Formula(test);
+    
+    // deleteNode(test);
+    deleteNode(diff);
+
+    TEX_Finish();
+}
+

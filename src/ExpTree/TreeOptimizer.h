@@ -2,13 +2,13 @@
 #define DEDFTR_TREE_TREE_OPTIMIZER_H
 #include "Node.h"
 
-int isNodeZero(ExprNode* node);
+int isNodeZero(const ExprNode* node);
 
-int isNodeOne(ExprNode* node);
+int isNodeOne(const ExprNode* node);
 
-int isOperator(ExprNode* node, Operator opr);
+int isOperator(const ExprNode* node, Operator opr);
 
-void nodeCpy(ExprNode* dest, ExprNode* src);
+void nodeCpy(ExprNode* dest,const ExprNode* src);
 
 void nodeCutL(ExprNode* node);
 

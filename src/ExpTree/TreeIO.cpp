@@ -25,7 +25,7 @@ void skipSpaces(const char** str){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void writeTree(ExprNode* tree, FILE* file){
+void writeTree(const ExprNode* tree, FILE* file){
     LOG_ASSERT(tree != NULL);
 
     treeSearch(tree, TreeSearchType::_PIS, &writeNodeData, file);
@@ -54,7 +54,7 @@ void writeNodeData(TreeSearchData* data){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-void fwriteNodeStr(ExprNode* node, FILE* file){
+void fwriteNodeStr(const ExprNode* node, FILE* file){
     LOG_ASSERT(node != NULL);
     LOG_ASSERT(file != NULL);
 
@@ -77,7 +77,7 @@ void fwriteNodeStr(ExprNode* node, FILE* file){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-char* graphTree(ExprNode* tree){
+char* graphTree(const ExprNode* tree){
     LOG_ASSERT(tree != NULL);
 
     static int nDump = 0;

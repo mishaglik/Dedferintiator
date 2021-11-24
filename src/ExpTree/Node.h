@@ -86,18 +86,18 @@ enum class TreeSearchType: unsigned{
 };
 
 struct TreeSearchData{
-    ExprNode* node = NULL;
+    const ExprNode* node = NULL;
     TreeSearchType type = TreeSearchType::NONE;
     void* extra = NULL;
 };
 
 typedef void (*search_action_f)(TreeSearchData* data);
 
-void treeSearch(ExprNode* node, TreeSearchType type, search_action_f func, void* extra);
+void treeSearch(const ExprNode* node, TreeSearchType type, search_action_f func, void* extra);
 
 //########################## Utility function ############################################
 
-void findVars(ExprNode* node, var_t* varList, size_t* nVars);
+void findVars(const ExprNode* node, var_t* varList, size_t* nVars);
 
 struct IsVarInfo{
     int isVar = 0;
@@ -106,11 +106,13 @@ struct IsVarInfo{
 
 void isNodeVar(TreeSearchData* data);
 
-int isVariable(ExprNode* node, var_t var = 'x');
+int isVariable(const ExprNode* node, var_t var = 'x');
 
-ExprNode* copyTree(ExprNode* tree);
+ExprNode* copyTree(const ExprNode* tree);
 
 int isTreeEq(const ExprNode* tree1, const ExprNode* tree2);
+
+void setVar(ExprNode* tree, var_t var, num_t value);
 
 //############################# newNode wrappers ##################################
 

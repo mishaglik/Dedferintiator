@@ -7,22 +7,43 @@
 
 FILE* TEX_File = NULL;
 
+int TO_TEX = 0;
+
 void TEX_Start(){
     TEX_File = fopen("Diff.tex", "w");
     LOG_ASSERT(TEX_File != NULL);
+    TO_TEX = 1;
     TEX(TEX_INIT);
     TEX(TEX_CHAPTER_1);
 }
 
-void TEX_Finish(){
+//------------------------------------------------------------------------------------------------
 
+void TEX_Finish(){
     TEX(TEX_FINAL);
     fclose(TEX_File);
-    system("pdflatex Diff.tex");
+    TO_TEX = 0;
+    system("pdflatex -halt-on-error Diff.tex");
 }
+
+//------------------------------------------------------------------------------------------------
+
+void TEX_Pause(){
+    TO_TEX = 0;
+}
+
+//------------------------------------------------------------------------------------------------
+
+void TEX_Resume(){
+    TO_TEX = 1;
+}
+
+//------------------------------------------------------------------------------------------------
 
 void TEX_Printf(const char* format, ...){
     LOG_ASSERT(format != NULL);
+
+    if(!TO_TEX) return;
 
     va_list args;
     va_start(args, format);
@@ -30,7 +51,9 @@ void TEX_Printf(const char* format, ...){
     va_end(args);
 }
 
-void TEX_Formula(ExprNode* node){
+//------------------------------------------------------------------------------------------------
+
+void TEX_Formula(const ExprNode* node, const char* str){
     LOG_ASSERT(node != NULL);
 
     size_t nVars = 0;
@@ -39,11 +62,14 @@ void TEX_Formula(ExprNode* node){
 
     
     TEX("$$\n");
+    if(str) TEX("%s = ", str);
     TEX_Node(node, 0);
     TEX("$$\n");
 }
 
-void TEX_Node(ExprNode* node, int depth){
+//------------------------------------------------------------------------------------------------
+
+void TEX_Node(const ExprNode* node, int depth){
     LOG_ASSERT(node != NULL);
     nTab(depth);
 
@@ -105,13 +131,17 @@ void TEX_Node(ExprNode* node, int depth){
                     TEX("}\n");
                     break;
                 }
-
-
-                TEX("\\left({\n");
+                TEX("{");
+                if(getSize(node->left) > 1){
+                    TEX("\\left(\n");
+                }
                 TEX_Node(node->left, depth + 1);
 
                 nTab(depth);
-                TEX("}\\right) %s {\n", node->value.opr.str);
+                if(getSize(node->left) > 1){
+                    TEX("\\right)");
+                }
+                TEX("} %s {\n", node->value.opr.str);
                 TEX_Node(node->right, depth + 1);
 
                 nTab(depth);
@@ -153,10 +183,17 @@ void TEX_Node(ExprNode* node, int depth){
                 break;
             case Operator::DF:
                 LOG_ASSERT(node->right);
-                TEX("\\left({");
+                if(getSize(node->right) > 1){
+                    TEX("\\left(\n");
+                }
+                TEX("{");
                 TEX_Node(node->right,depth + 1);
                 nTab(depth);
-                TEX("}\\right)'\n");
+                TEX("}");
+                if(getSize(node->right) > 1){
+                    TEX("\\right)");
+                }
+                TEX("'\n");
                 break;
             case Operator::NONE:
             default:
@@ -188,13 +225,17 @@ const char* getOpTexStr(const Operator opr){
 }
 #undef OP_DEF
 
+//------------------------------------------------------------------------------------------------
+
 void TEX_Phrase(TEX_PLACE place, ...){
     va_list ap;
     va_start(ap, place);
     switch (place)
     {
     case TEX_PLACE::SingleDiffStart:
+        TEX("\\paragraph{");
         TEX(CHOOSE(TEX_DIF_VAR), (var_t)va_arg(ap, int));
+        TEX("}\n");
         break;
     case TEX_PLACE::DiffStart:
         TEX(CHOOSE(TEX_DIFF_START));
@@ -210,7 +251,7 @@ void TEX_Phrase(TEX_PLACE place, ...){
         break;
     case TEX_PLACE::MarkAs:
         TEX("Обознанчим за\n");
-        printWhere(va_arg(ap, ExprNode*));
+        TEX_Replace(va_arg(ap, ExprNode*));
     case TEX_PLACE::FindVars:
     default:
         break;
@@ -219,21 +260,28 @@ void TEX_Phrase(TEX_PLACE place, ...){
     va_end(ap);
 }
 
+void TEX_D(const ExprNode* node, var_t var){
+    LOG_ASSERT(node != NULL);
 
+    if(node->type != ExprNodeType::OPERATOR) return;
 
+    TEX_Phrase(TEX_PLACE::DiffOpt, node->value.opr.opr);
+    TEX("$$\n");    
+    TEX_RAW_D(node, var);
+    TEX("$$\n");    
+}
+
+//------------------------------------------------------------------------------------------------
 
 #define L nNode->left
 #define R nNode->right
 #define C(x) copyTree(x)
 #define D(x) DF(C(x))
 
-void TEX_D(ExprNode* node, var_t var){
+void TEX_RAW_D(const ExprNode* node, var_t var){
     LOG_ASSERT(node != NULL);
 
     if(node->type != ExprNodeType::OPERATOR) return;
-
-    TEX_Phrase(TEX_PLACE::DiffOpt, node->value.opr.opr);
-
 
     ExprNode* nNode = copyTree(node);
     ExprNode* oRoot = DF(nNode); 
@@ -252,22 +300,55 @@ void TEX_D(ExprNode* node, var_t var){
     supressTree(oRoot);
     supressTree(nRoot);
 
-    TEX("$$\n");    
     TEX_Node(oRoot, 0);
     TEX(" = ");
     TEX_Node(nRoot, 0);
-    TEX("$$\n");
 
     deleteNode(oRoot);
     deleteNode(nRoot);
 }
+#undef OP_DEF
+//------------------------------------------------------------------------------------------------
 
-
-
-void printWhere(const ExprNode* node){
+void TEX_Replace(const ExprNode* node){
     LOG_ASSERT(node != NULL);
 
     TEX("$$ %s = ", getLabelName(node));
-    TEX_Node((ExprNode*)node, 0);
+    TEX_Node(node, 0);
     TEX("$$\n");
 }
+
+//------------------------------------------------------------------------------------------------
+
+const char* TEX_GetVarName(){
+    static int i = 0;
+    return TEX_VARS[i++];
+}
+
+//------------------------------------------------------------------------------------------------
+
+void TEX_Part(int n){
+    TEX(TEX_PARTS[n]);
+}
+
+//------------------------------------------------------------------------------------------------
+
+
+#define OP_DEF(name, flags, strVal, diff, ...)              \
+    if(Operator::name != Operator::DF){                     \
+        if(HAS_FLAG(flags, OperatorFlags::OF_BothArgs))     \
+             node = name(VAR('f'), VAR('g'));               \
+        else node = name(VAR('f'));                         \
+        TEX("\\begin{equation}");                           \
+        TEX_RAW_D(node, 'g');                               \
+        TEX("\\end{equation}");                             \
+        deleteNode(node);                                   \
+        node = NULL;                                        \
+    }                                                       \
+
+
+void TEX_DLib(){
+    ExprNode* node = NULL;
+    #include OPERATORS_H
+}
+#undef OP_DEF

@@ -32,7 +32,7 @@ OP_DEF(POW, 0b110, '^', (
         (MUL(C(node), ADD(MUL(D(R), LN(C(L))), MUL(DIV(D(L), C(L)), C(R))))) :
         (MUL(MUL(C(R), POW(C(L), SUB(C(R), CONST(1)))), D(L)))
                 
-), "^", 2 * L + R + 1)
+), "^", 8 * L + 2 * R + 1)
 
 OP_DEF(SIN, 0b001, 0x6E6973 /* 'nis' */, MUL(COS(C(R)), D(R)), "\\sin", 2*R + 3)
 

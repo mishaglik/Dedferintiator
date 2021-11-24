@@ -8,10 +8,11 @@
 #define D(x) diffentiate(x, var)
 
 
-ExprNode* diffentiate(ExprNode* node, var_t var){
+ExprNode* diffentiate(const ExprNode* node, var_t var, int silent){
     LOG_ASSERT(node != NULL);
 
     ExprNode* result = NULL;
+    
     
     switch (node->type)
     {
@@ -40,15 +41,20 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
         LOG_ERROR("Incorrect node [%p]\n", node);
         return NULL;
     }
+    if(!silent){
+        treeOptimize(result);
+        buildTreeLabeling(result);
+        TEX_D(node, var);
 
-    treeOptimize(result);
-    buildTreeLabeling(result);
-    // if(getSize(result, getGlobalLabelNS()) > REQUIRE_SUBTREE_SIZE){
-        // TEX("Обозначим за $ %s $\n",
-        // registerLabel( result, getNameF));
-        // printWhere(result);
-    // }
-    TEX_D(node, var); 
+        TEX_Phrase(TEX_PLACE::DiffOpt, node->value.opr.opr);
+        ExprNode* tmp = DF(copyTree(node));
+        TEX("$$\n");
+        TEX_Node(tmp, 0);
+        TEX(" = ");
+        TEX_Node(result, 0);
+        TEX("$$\n");
+        deleteNode(tmp);
+    }
     return result;
 }
 
@@ -58,10 +64,9 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
 #undef R
 
 
-ExprNode* fullDifferntial(ExprNode* node){
+ExprNode* fullDifferntial(const ExprNode* node){
     LOG_ASSERT(node != NULL);
 
-    TEX_Formula(node);
     free(graphTree(node));
 
     TEX_Phrase(TEX_PLACE::DiffStart);
@@ -90,16 +95,39 @@ ExprNode* fullDifferntial(ExprNode* node){
         TEX_Phrase(TEX_PLACE::SingleDiffStart, varList[i]);
         curNode = ADD(curNode, POW(diffentiate(node, varList[i]), CONST(2)));
     }
-    TEX_Phrase(TEX_PLACE::SummUp);
     ExprNode* diff =  POW(curNode, DIV(CONST(1), CONST(2)));
     free(graphTree(diff));
     treeOptimize(diff);
     buildTreeLabeling(diff);
-    TEX_Formula(diff);
-    TEX("Где, \n");
-    forEachUnique(&printWhere);
     free(graphTree(diff));
 
     return diff;
 }
 
+ExprNode* taylorSeries(const ExprNode* node, var_t var, num_t value, int degree){
+    LOG_ASSERT(node != NULL);
+    ExprNode* ans = CONST(0);
+    ExprNode* cur = copyTree(node);
+
+    for(int i = 0; i < degree; ++i){
+        ExprNode* nxt = diffentiate(cur, var);
+
+        ExprNode* koef = cur;
+        setVar(koef, var, value);
+        koef = DIV(MUL(koef, POW(SUB(VAR(var), CONST(value)), CONST(i))), CONST(factorial(i)));
+        ans = ADD(ans, koef);
+
+        cur = nxt;
+    }
+    deleteNode(cur);
+    treeOptimize(ans);
+    return ans;
+}
+
+num_t factorial(num_t n){
+    num_t ans = 1;
+    for(num_t i = 1; i <= n; ++i){
+        ans *= i;
+    }
+    return ans;
+}

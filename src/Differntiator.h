@@ -6,8 +6,12 @@
 #undef OPERATORS_H
 #define OPERATORS_H "ExpTree/Operators.h"
 
-ExprNode* diffentiate(ExprNode* node, var_t var);
+ExprNode* diffentiate(const ExprNode* node, var_t var, int silent = 0);
 
-ExprNode* fullDifferntial(ExprNode* node);
+ExprNode* fullDifferntial(const ExprNode* node);
+
+ExprNode* taylorSeries(const ExprNode* node, var_t var, num_t value, int degree);
+
+num_t factorial(num_t n);
 
 #endif
