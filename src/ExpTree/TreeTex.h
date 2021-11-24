@@ -25,10 +25,13 @@ enum class TEX_PLACE{
     NoDiff,
     SummUp,
     DiffOpt,
+    MarkAs,
 };
 
 void TEX_Phrase(TEX_PLACE place, ...);
 
 void TEX_D(ExprNode* node, var_t var);
+
+void printWhere(const ExprNode* node);
 
 #endif

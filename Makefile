@@ -19,7 +19,7 @@ CXXFLAGS += -DMINOR_VERSION=$(MINOR_VERSION)
 
 CXXFLAGS += $(SANFLAGS)
 
-SOURCES_ExpTree = Node.cpp TreeOptimizer.cpp TreeTex.cpp TreeIO.cpp
+SOURCES_ExpTree = Node.cpp TreeOptimizer.cpp TreeTex.cpp TreeIO.cpp TreeLabeler.cpp
 
 SUBDIRS = ${shell find $(SRC_DIR) -type d -printf '%P '}
 

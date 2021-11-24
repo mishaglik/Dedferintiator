@@ -7,8 +7,20 @@
 #include "Logger.h"
 #include "utils.h"
 #include <string.h>
+
+const char* names[] = {
+    "\\alpha", "\\beta", "p", "a", "b", "c", "d", "e", "f", "g", "h", "j", "k", "l'", "\\gamma", "\\mu", "A", "B", "C", "D", "E", "F"
+};
+const char* getName();
+const char* getName(){
+    static int i = 0;
+    return names[i++];
+}
+
 int main(){
     TEX_Start();
+    setGlobalLabelNS(createLabelNS());
+    setNamingFunction(&getName);
 
     FILE* inFile = fopen("func.txt", "r");
     LOG_ASSERT(inFile != NULL);
@@ -29,6 +41,7 @@ int main(){
     free(string);
     deleteNode(root);
     deleteNode(diff);
+    deleteLabelNS(getGlobalLabelNS());
     TEX_Finish();
     return 0;
 }

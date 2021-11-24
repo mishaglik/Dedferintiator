@@ -3,6 +3,8 @@
 #include "string.h"
 #include "math.h"
 
+extern const char* (*getNameF)();
+
 int isNodeZero(ExprNode* node){
     LOG_ASSERT(node != NULL);
     return node->type == ExprNodeType::NUMBER && node->value.num == 0;
@@ -37,7 +39,14 @@ void nodeCutL(ExprNode* node){
 
     LOG_ASSERT(right);
     nodeCpy(node, right);
-    free(right);
+
+    #ifdef USE_LABEL_SYSTEM
+    if(getLabelName(right)) registerLabel(node);
+    #endif
+
+    right->left = NULL;
+    right->right = NULL;
+    deleteNode(right);
 }
 
 void nodeCutR(ExprNode* node){
@@ -51,7 +60,14 @@ void nodeCutR(ExprNode* node){
     }
 
     nodeCpy(node, left);
-    free(left);
+
+    #ifdef USE_LABEL_SYSTEM
+    if(getLabelName(left)) registerLabel(node);
+    #endif
+
+    left->left = NULL;
+    left->right = NULL;
+    deleteNode(left);
 }
 
 void treeOptimize(ExprNode* root){

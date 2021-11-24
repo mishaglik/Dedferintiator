@@ -1,16 +1,18 @@
 #include "Differntiator.h"
 #include "Logger.h"
 
+#define L node->left
+#define R node->right
 
 #define C(x) copyTree(x)
 #define D(x) diffentiate(x, var)
 
-#define L node->left
-#define R node->right
 
 ExprNode* diffentiate(ExprNode* node, var_t var){
     LOG_ASSERT(node != NULL);
 
+    ExprNode* result = NULL;
+    
     switch (node->type)
     {
     case ExprNodeType::NUMBER:   return CONST(0);
@@ -20,9 +22,8 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
             if(!isVariable(node, var)){
                 return CONST(0);
             }
-            TEX_D(node, var);
 
-            #define OP_DEF(name, flags, strVal, diff, ...) case Operator::name: return diff;
+            #define OP_DEF(name, flags, strVal, diff, ...) case Operator::name: result = diff; break;
             switch (node->value.opr.opr)
             {
             #include OPERATORS_H
@@ -33,11 +34,22 @@ ExprNode* diffentiate(ExprNode* node, var_t var){
             }
             #undef OP_DEF
         }
+        break;
     case ExprNodeType::NONE:
     default:
         LOG_ERROR("Incorrect node [%p]\n", node);
         return NULL;
     }
+
+    treeOptimize(result);
+    buildTreeLabeling(result);
+    // if(getSize(result, getGlobalLabelNS()) > REQUIRE_SUBTREE_SIZE){
+        // TEX("Обозначим за $ %s $\n",
+        // registerLabel( result, getNameF));
+        // printWhere(result);
+    // }
+    TEX_D(node, var); 
+    return result;
 }
 
 #undef C
@@ -82,7 +94,10 @@ ExprNode* fullDifferntial(ExprNode* node){
     ExprNode* diff =  POW(curNode, DIV(CONST(1), CONST(2)));
     free(graphTree(diff));
     treeOptimize(diff);
+    buildTreeLabeling(diff);
     TEX_Formula(diff);
+    TEX("Где, \n");
+    forEachUnique(&printWhere);
     free(graphTree(diff));
 
     return diff;

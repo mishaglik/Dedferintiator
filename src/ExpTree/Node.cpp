@@ -4,6 +4,7 @@
 #include "utils.h"
 #include <ctype.h>
 
+extern const char* (*getNameF)();
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -24,6 +25,10 @@ ExprNode* newNode(ExprNodeType type, ExprNodeValue value, ExprNode* left, ExprNo
 void deleteNode(ExprNode* node){
     LOG_ASSERT(node != NULL);
 
+    #ifdef USE_LABEL_SYSTEM
+        deleteLabel(node);
+    #endif
+
     if(node->left){
         deleteNode(node->left);
         node->left = NULL;
@@ -34,6 +39,7 @@ void deleteNode(ExprNode* node){
     }
     node->type = ExprNodeType::NONE;
     node->value.num = 0;
+
     free(node);
 }
 
@@ -96,8 +102,16 @@ void isNodeVar(TreeSearchData* data){
 ExprNode* copyTree(ExprNode* node){
     LOG_ASSERT(node != NULL);
 
-    return newNode(node->type, node->value, (node->left  ? copyTree(node->left)  : NULL),
-                                            (node->right ? copyTree(node->right) : NULL));
+
+    ExprNode* ptr =  newNode(node->type, node->value, (node->left  ? copyTree(node->left)  : NULL),
+                                                      (node->right ? copyTree(node->right) : NULL));
+
+    
+    #ifdef USE_LABEL_SYSTEM
+        if(getLabelName(node)) registerLabel(ptr);
+    #endif
+
+    return ptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -159,7 +173,7 @@ void findVars(ExprNode* node, var_t* varList, size_t* nVars){
 
 //--------------------------------------------------------------------------------------------------------------------
 
-int isTreeEq(ExprNode* tree1, ExprNode* tree2){
+int isTreeEq(const ExprNode* tree1,const ExprNode* tree2){
     LOG_ASSERT(tree1 != NULL);
     LOG_ASSERT(tree2 != NULL);
 

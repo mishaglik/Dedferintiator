@@ -45,8 +45,15 @@ void TEX_Formula(ExprNode* node){
 
 void TEX_Node(ExprNode* node, int depth){
     LOG_ASSERT(node != NULL);
-
     nTab(depth);
+
+    #ifdef USE_LABEL_SYSTEM
+    const char* label = getLabelName(node);
+    if(depth && label){
+        TEX("{%s}\n", label);
+        return;
+    }
+    #endif
 
     switch (node->type)
     {
@@ -201,6 +208,9 @@ void TEX_Phrase(TEX_PLACE place, ...){
     case TEX_PLACE::DiffOpt:
         TEX(CHOOSE(TEX_DIFF));
         break;
+    case TEX_PLACE::MarkAs:
+        TEX("Обознанчим за\n");
+        printWhere(va_arg(ap, ExprNode*));
     case TEX_PLACE::FindVars:
     default:
         break;
@@ -237,7 +247,10 @@ void TEX_D(ExprNode* node, var_t var){
     default:
         LOG_ERROR("Wrong operator\n");
         break;
-    }
+    }   
+
+    supressTree(oRoot);
+    supressTree(nRoot);
 
     TEX("$$\n");    
     TEX_Node(oRoot, 0);
@@ -247,4 +260,14 @@ void TEX_D(ExprNode* node, var_t var){
 
     deleteNode(oRoot);
     deleteNode(nRoot);
+}
+
+
+
+void printWhere(const ExprNode* node){
+    LOG_ASSERT(node != NULL);
+
+    TEX("$$ %s = ", getLabelName(node));
+    TEX_Node((ExprNode*)node, 0);
+    TEX("$$\n");
 }

@@ -110,7 +110,7 @@ int isVariable(ExprNode* node, var_t var = 'x');
 
 ExprNode* copyTree(ExprNode* tree);
 
-int isTreeEq(ExprNode* tree1, ExprNode* tree2);
+int isTreeEq(const ExprNode* tree1, const ExprNode* tree2);
 
 //############################# newNode wrappers ##################################
 
@@ -120,4 +120,9 @@ int isTreeEq(ExprNode* tree1, ExprNode* tree2);
 #define OP_DEF(name, ...) ExprNode* name(ExprNode* x, ExprNode* y = NULL);
 #include OPERATORS_H
 #undef OP_DEF 
+
+#ifdef USE_LABEL_SYSTEM
+#include "TreeLabeler.h"
+#endif
+
 #endif
