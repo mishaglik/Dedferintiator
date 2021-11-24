@@ -53,16 +53,28 @@ void CreateTex(const ExprNode* node){
     TEX_Formula(diff);
     TEX("Где, \n");
     forEachUnique(&TEX_Replace);
-
-    TEX_Pause();
-    // ExprNode* test = taylorSeries(node, 'x', 0, 10);
-    TEX_Resume();
-
-    // TEX_Formula(test);
-    
-    // deleteNode(test);
     deleteNode(diff);
 
+    TEX_Part(3);
+    ExprNode* taylor = growTree("((x)* (sin(x)))");
+    TEX_Pause();
+    ExprNode* test = taylorSeries(taylor, 'x', 0, 6);
+    treeOptimize(test);
+    buildTreeLabeling(test);
+    TEX_Resume();
+
+    TEX("$$\n");
+    TEX("f = ");
+    TEX_Node(test,0);
+    TEX(" + o(x^5)");
+    TEX("$$\n");
+    
+    TEX("Где, \n");
+    forEachUnique(&TEX_Replace);
+
+    deleteNode(test);
+    deleteNode(taylor);
+    TEX_Part(4);
     TEX_Finish();
 }
 

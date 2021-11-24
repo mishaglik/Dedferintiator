@@ -14,7 +14,7 @@ const char* TEX_DIF_VAR[TEX_DIF_VAR_SZ] = {
     "Не забывайте, о существовании $ %c $\\\\\n",
 };
 
-const int   TEX_DIFF_SZ = 17;
+const int   TEX_DIFF_SZ = 19;
 const char* TEX_DIFF[TEX_DIFF_SZ] = {
     "Теперь исследуем данную функцию:\n",
     "Очевидно что \n",
@@ -32,7 +32,9 @@ const char* TEX_DIFF[TEX_DIFF_SZ] = {
     "Если вы дочитали, то уже вам несложно видеть, что это всего лишь\n",
     "А здесь немного магии из предыдущего параграфа\n",
     "Несложно видеть, что это очевидным образом преобразуется в \n",
-    "А доказательство этого вы можете найти в \\cite{Proof}\n"
+    "А доказательство этого вы можете найти в \\cite{Proof}\n",
+    "Счёт производной мы не бросим 1488\n",
+    "Могли бы уже землю обогнуть, а тут производная\n",
 };
 
 const int   TEX_DIFF_START_SZ = 1;
@@ -41,7 +43,18 @@ const char* TEX_DIFF_START[TEX_DIFF_START_SZ] = {
 };
 
 
-
+const int   TEX_RENAME_SZ = 9;
+const char* TEX_RENAME[TEX_RENAME_SZ] = {
+    "Обзозначим за",
+    "Пусть:",
+    "Положим:",
+    "",
+    "",
+    "Удобно взять ",
+    "Ввиду громоздкости объявим",
+    "Как завещал нам ДЕД\\cite{DED}:",
+    "Букв много не бывает, так что пусть:"
+};
 
 
 
@@ -51,6 +64,8 @@ const char* TEX_PARTS[] = {
     "\\input{tex/Chapter2Part1.tex}\n",
     "\\input{tex/Chapter2Part2.tex}\n",
     "\\input{tex/Chapter2Part3.tex}\n",
+    "\\input{tex/Chapter2Part4.tex}\n",
+    "\\input{tex/Chapter3Part2.tex}\n",
 };
 
 const char* TEX_VARS[] = {
@@ -75,6 +90,22 @@ const char* TEX_VARS[] = {
     "\\psi",
     "\\epsilon",
     "end",
-
-
+    "\\alpha_1",
+    "\\alpha_2",
+    "\\alpha_3",
+    "\\alpha_4",
+    "\\alpha_5",
+    "\\alpha_6",
+    "\\alpha_7",
+    "\\alpha_8",
+    "\\alpha_9",
+    "\\alpha_{10}",
+    "\\alpha_{11}",
+    "\\alpha_{12}",
+    "\\alpha_{13}",
+    "\\alpha_{14}",
+    "\\alpha_{15}",
+    "\\alpha_{16}",
+    "\\alpha_{17}",
+    "\\alpha_{18}",
 };

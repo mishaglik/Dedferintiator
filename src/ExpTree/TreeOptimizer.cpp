@@ -165,7 +165,8 @@ int zeroOneArgOpt(ExprNode* node){
                 case Operator::SUB:
                     nodeCutR(node);
                     return nOpt + 1;
-
+                    
+                case Operator::CH:
                 case Operator::COS:
                 case Operator::POW:
                     nodeCutL(node);

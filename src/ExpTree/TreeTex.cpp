@@ -169,12 +169,19 @@ void TEX_Node(const ExprNode* node, int depth){
                 nTab(depth);
                 TEX("\\right|\n");
                 break;
-
+            case Operator::SH:
+            case Operator::CH:
             case Operator::SIN:
             case Operator::COS:
             case Operator::TAN:
             case Operator::COT:
             case Operator::LN:
+            case Operator::CTH:
+            case Operator::TH:
+            case Operator::ASN:
+            case Operator::ACN:
+            case Operator::ATG:
+            case Operator::ACT:
                 LOG_ASSERT(node->right);
                 TEX("%s\\left({\n", getOpTexStr(node->value.opr.opr));
                 TEX_Node(node->right, depth + 1);
@@ -230,6 +237,8 @@ const char* getOpTexStr(const Operator opr){
 void TEX_Phrase(TEX_PLACE place, ...){
     va_list ap;
     va_start(ap, place);
+    
+
     switch (place)
     {
     case TEX_PLACE::SingleDiffStart:
@@ -250,7 +259,7 @@ void TEX_Phrase(TEX_PLACE place, ...){
         TEX(CHOOSE(TEX_DIFF));
         break;
     case TEX_PLACE::MarkAs:
-        TEX("Обознанчим за\n");
+        TEX(CHOOSE(TEX_RENAME));
         TEX_Replace(va_arg(ap, ExprNode*));
     case TEX_PLACE::FindVars:
     default:
@@ -313,9 +322,9 @@ void TEX_RAW_D(const ExprNode* node, var_t var){
 void TEX_Replace(const ExprNode* node){
     LOG_ASSERT(node != NULL);
 
-    TEX("$$ %s = ", getLabelName(node));
+    TEX("\\begin{equation} %s = ", getLabelName(node));
     TEX_Node(node, 0);
-    TEX("$$\n");
+    TEX("\\end{equation}\n");
 }
 
 //------------------------------------------------------------------------------------------------

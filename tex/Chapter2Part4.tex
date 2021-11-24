@@ -1,0 +1,24 @@
+\section{Упражнения}
+В качестве упражнения читателю предлагается найти несколько производных самоcтоятельно.
+
+\begin{enumerate}
+	\item $ f(x_1,x_2,x_3,\dots) = x_1^{x_2^{x_3^{\dots}}}$
+	\item $ f(x) = \frac{\sin{1/x} * e^{x \ctg{x^2}}}{1 - x^{|x|}} $
+	\item $ f(x) = \frac{x^y + y^x}{z^z} $
+ 	\item $ f(x) = \left({
+ 	\frac{ \sin^2{(3x-1)} + \sqrt{x^4 - \ln x}}
+ 	{5^{x^7} - \ch(\arccos(x))}
+ }\right)^{x\tg x}$\cite{Semestr}
+\end{enumerate}
+\chapter{Г-н Тейлор}.
+\section{Определение}
+\epigraph{"Да я как разложу тебя по ортонормированному базису в линейном пространстве"}{{\textit Average linear algebra enjoyer}}
+
+Разложением по Тейлору зовется выражение следующего вида:
+
+$$
+	f(x) = \sum_{k=1}^{n} \frac{f^{(k)}(x_0)  (x-x_0)^k}{k!} + o(x^n)
+$$
+
+\section{Пример}
+Для примера разложим функцию $ x * \sin(x) $ до $ o(x^5)$ при $ x \rightarrow 0 $

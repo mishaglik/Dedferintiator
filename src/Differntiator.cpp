@@ -5,7 +5,7 @@
 #define R node->right
 
 #define C(x) copyTree(x)
-#define D(x) diffentiate(x, var)
+#define D(x) diffentiate(x, var, silent)
 
 
 ExprNode* diffentiate(const ExprNode* node, var_t var, int silent){
@@ -41,11 +41,20 @@ ExprNode* diffentiate(const ExprNode* node, var_t var, int silent){
         LOG_ERROR("Incorrect node [%p]\n", node);
         return NULL;
     }
-    if(!silent){
+
+    static int skip = 0;
+    if(silent == 0){
         treeOptimize(result);
         buildTreeLabeling(result);
+        if(skip) {
+            skip--;
+            return result;
+        }
+        if(rand() % 20 == 0) {
+            skip = rand() % 10;
+            TEX("Этот кусок мы оставляем читателю в качестве упражнения.\n");
+        }
         TEX_D(node, var);
-
         TEX_Phrase(TEX_PLACE::DiffOpt, node->value.opr.opr);
         ExprNode* tmp = DF(copyTree(node));
         TEX("$$\n");
@@ -110,7 +119,7 @@ ExprNode* taylorSeries(const ExprNode* node, var_t var, num_t value, int degree)
     ExprNode* cur = copyTree(node);
 
     for(int i = 0; i < degree; ++i){
-        ExprNode* nxt = diffentiate(cur, var);
+        ExprNode* nxt = diffentiate(cur, var, 1);
 
         ExprNode* koef = cur;
         setVar(koef, var, value);
