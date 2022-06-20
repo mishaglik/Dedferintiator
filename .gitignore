@@ -57,7 +57,7 @@ lib/
 lib
 log/
 main
-*.pdf
+Diff.pdf
 diff.tex
 *.aux
 *.log
